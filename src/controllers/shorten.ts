@@ -19,36 +19,43 @@ export const shortenUrl = async (req: Request, res: Response) => {
     let randomPath = randomString();
     let generatedUrl = `${domain}/${randomPath}`;
 
-    // find existed shortened URLs
-    const existedUrl = await ShortenedUrlModel.findOne({ shortenedUrl: generatedUrl });
-    if (existedUrl) {
-        randomPath = randomString();
-        generatedUrl = `${domain}/${randomPath}`;
+    try {
+        // find existed shortened URLs
+        const existedUrl = await ShortenedUrlModel.findOne({ shortenedUrl: generatedUrl });
+        if (existedUrl) {
+            randomPath = randomString();
+            generatedUrl = `${domain}/${randomPath}`;
+        }
+
+        const shortenedUrl = new ShortenedUrlModel({
+            originalUrl,
+            shortenedUrl: generatedUrl,
+        });
+
+        await shortenedUrl.save();
+
+        return res.status(201).json({
+            message: 'URL shortened successfully',
+            shortenedUrl
+        });
+    } catch (err) {
+        console.log(err);
     }
-
-    const shortenedUrl = new ShortenedUrlModel({
-        originalUrl,
-        shortenedUrl: generatedUrl,
-    });
-
-    await shortenedUrl.save();
-
-    return res.status(201).json({
-        message: 'URL shortened successfully',
-        shortenedUrl
-    });
 }
 
 export const redirectUrl = async (req: Request, res: Response) => {
     const { url } = req.body;
 
     //get long url
-    const longUrl = await ShortenedUrlModel.findOne({ shortenedUrl: url });
-    if (!longUrl) {
-        return res.status(404).json({
-            message: 'URL not found'
-        });
+    try {
+        const longUrl = await ShortenedUrlModel.findOne({ shortenedUrl: url });
+        if (!longUrl) {
+            return res.status(404).json({
+                message: 'URL not found'
+            });
+        }
+        return res.status(200).json({ originalUrl: longUrl.originalUrl });
+    } catch (err) {
+        console.log(err);
     }
-
-    return res.status(200).json({originalUrl: longUrl.originalUrl});
 };

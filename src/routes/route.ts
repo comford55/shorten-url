@@ -1,7 +1,7 @@
 import { shortenUrl } from "../controllers/shorten";
-import express from "express";
+import { Router } from "express";
 
-const router = express.Router();
+const router: Router = Router();
 
 router.post('/api/shortenUrl', shortenUrl);
 

@@ -1,9 +1,12 @@
 import express, { Express } from 'express';
 import db from './db/database';
 import router from './routes/route';
+import bodyParser from 'body-parser';
 
 const app: Express = express();
 const port: string = Bun.env.PORT || "3000";
+
+app.use(bodyParser.json());
 
 app.use(router);
 

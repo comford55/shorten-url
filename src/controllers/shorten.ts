@@ -43,7 +43,7 @@ export const shortenUrl = async (req: Request, res: Response) => {
     }
 }
 
-export const redirectUrl = async (req: Request, res: Response) => {
+export const getLongUrl = async (req: Request, res: Response) => {
     const { url } = req.body;
 
     //get long url

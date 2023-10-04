@@ -13,10 +13,9 @@ const randomString = (): string => {
 }
 
 export const shortenUrl = async (req: Request, res: Response) => {
-    const url = req.body;
-    console.log(url);
+    const { originalUrl } = req.body;
 
-    const domain = Bun.env.DOMAIN;
+    const domain: string = Bun.env.DOMAIN_STRING!;
     let randomPath = randomString();
     let generatedUrl = `${domain}/${randomPath}`;
 
@@ -27,15 +26,29 @@ export const shortenUrl = async (req: Request, res: Response) => {
         generatedUrl = `${domain}/${randomPath}`;
     }
 
-    // const shortenedUrl = new ShortenedUrlModel({
-    //     originalUrl,
-    //     shortenedUrl: generatedUrl,
-    // });
+    const shortenedUrl = new ShortenedUrlModel({
+        originalUrl,
+        shortenedUrl: generatedUrl,
+    });
 
-    // await shortenedUrl.save();
+    await shortenedUrl.save();
 
-    // return res.status(201).json({
-    //     message: 'URL shortened successfully',
-    //     shortenedUrl
-    // });
+    return res.status(201).json({
+        message: 'URL shortened successfully',
+        shortenedUrl
+    });
 }
+
+export const redirectUrl = async (req: Request, res: Response) => {
+    const { url } = req.body;
+
+    //get long url
+    const longUrl = await ShortenedUrlModel.findOne({ shortenedUrl: url });
+    if (!longUrl) {
+        return res.status(404).json({
+            message: 'URL not found'
+        });
+    }
+
+    return res.status(200).json({originalUrl: longUrl.originalUrl});
+};
